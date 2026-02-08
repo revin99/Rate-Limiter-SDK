@@ -1,0 +1,2 @@
+com.revin.ratelimiter.autoconfigure.RateLimiterAutoConfiguration
+com.revin.ratelimiter.autoconfigure.RateLimiterWebAutoConfiguration
