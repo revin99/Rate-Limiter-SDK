@@ -1,2 +1,4 @@
 com.revin.ratelimiter.autoconfigure.RateLimiterAutoConfiguration
 com.revin.ratelimiter.autoconfigure.RateLimiterWebAutoConfiguration
+com.revin.ratelimiter.autoconfigure.RateLimiterRedisAutoConfiguration
+com.revin.ratelimiter.autoconfigure.RateLimiterInterceptorAutoConfiguration

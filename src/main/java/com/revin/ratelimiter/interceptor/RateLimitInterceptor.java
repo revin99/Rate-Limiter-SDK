@@ -7,14 +7,22 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.time.Duration;
 
 
 public class RateLimitInterceptor implements HandlerInterceptor {
 
     private static final Logger log = LoggerFactory.getLogger(RateLimitInterceptor.class);
+
+    private final RedisTemplate<String,String> redisTemplate;
+    public RateLimitInterceptor(RedisTemplate<String, String> redisTemplate){
+
+        this.redisTemplate = redisTemplate;
+    }
 
     @Override
     public boolean preHandle(
@@ -47,6 +55,14 @@ public class RateLimitInterceptor implements HandlerInterceptor {
                 rateLimit.limit(),
                 rateLimit.durationSeconds(),
                 rateLimit.algorithm());
+
+
+        String key = "ratelimiter:hit:" + request.getRequestURI();
+        String value = String.valueOf(System.currentTimeMillis());
+
+        redisTemplate.opsForValue().set(key, value, Duration.ofSeconds(10));
+
+        log.info("Stored in Redis -> {} = {}", key, value);
 
         return true;
     }

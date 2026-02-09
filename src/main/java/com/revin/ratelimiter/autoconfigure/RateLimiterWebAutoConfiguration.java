@@ -8,9 +8,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class RateLimiterWebAutoConfiguration implements WebMvcConfigurer {
 
+    private final RateLimitInterceptor interceptor;
+
+    public RateLimiterWebAutoConfiguration(RateLimitInterceptor interceptor) {
+        this.interceptor = interceptor;
+    }
+
     @Override
     public void addInterceptors(InterceptorRegistry registry){
-        registry.addInterceptor(new RateLimitInterceptor());
+        registry.addInterceptor(interceptor);
 
     }
 }
