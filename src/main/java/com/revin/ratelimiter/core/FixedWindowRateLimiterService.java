@@ -4,9 +4,11 @@ import com.revin.ratelimiter.context.RateLimitContext;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 
+@Component
 public class FixedWindowRateLimiterService implements RateLimiterService {
 
     private final RedisTemplate<String,String> redisTemplate;
