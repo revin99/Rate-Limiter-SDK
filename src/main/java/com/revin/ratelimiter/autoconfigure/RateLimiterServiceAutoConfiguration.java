@@ -1,7 +1,10 @@
 package com.revin.ratelimiter.autoconfigure;
 
 import com.revin.ratelimiter.core.*;
+import com.revin.ratelimiter.key.DefaultRateLimitKeyResolver;
+import com.revin.ratelimiter.key.RateLimitKeyResolver;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -32,11 +35,17 @@ public class RateLimiterServiceAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
+    public RateLimitKeyResolver rateLimitKeyResolver() {
+        return new DefaultRateLimitKeyResolver();
+    }
+
+    @Bean
     public FixedWindowRateLimiterService fixedWindowRateLimiterService(
-            @Qualifier("redisTemplate")
-            RedisTemplate<String, String> redisTemplate
+            @Qualifier("redisTemplate") RedisTemplate<String, String> redisTemplate,
+            RateLimitKeyResolver keyResolver
     ) {
-        return new FixedWindowRateLimiterService(redisTemplate);
+        return new FixedWindowRateLimiterService(redisTemplate, keyResolver);
     }
 
     @Bean
