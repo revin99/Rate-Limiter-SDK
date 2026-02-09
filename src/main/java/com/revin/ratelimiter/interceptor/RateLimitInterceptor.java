@@ -3,6 +3,7 @@ package com.revin.ratelimiter.interceptor;
 
 import com.revin.ratelimiter.annotation.RateLimit;
 import com.revin.ratelimiter.context.RateLimitContext;
+import com.revin.ratelimiter.core.RateLimiterService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.LoggerFactory;
@@ -19,10 +20,11 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     private static final Logger log = LoggerFactory.getLogger(RateLimitInterceptor.class);
 
-    private final RedisTemplate<String,String> redisTemplate;
-    public RateLimitInterceptor(RedisTemplate<String, String> redisTemplate){
+    private final RateLimiterService rateLimiterService;
 
-        this.redisTemplate = redisTemplate;
+    public RateLimitInterceptor(RateLimiterService rateLimiterService){
+        this.rateLimiterService = rateLimiterService;
+
     }
 
     @Override
@@ -43,6 +45,14 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
         RateLimitContext context = new RateLimitContext(handlerMethod,rateLimit);
 
+        boolean allowed = rateLimiterService.isAllowed(context,request);
+
+        if(!allowed){
+            response.setStatus(429);
+            response.getWriter().write("Too many requests");
+            return false;
+        }
+
         log.info("""
                 RateLimit detected
                 Controller: {}
@@ -56,23 +66,6 @@ public class RateLimitInterceptor implements HandlerInterceptor {
                 rateLimit.limit(),
                 rateLimit.durationSeconds(),
                 rateLimit.algorithm());
-
-
-        String key = "ratelimiter:hit:" + request.getRequestURI();
-        Long count = redisTemplate.opsForValue().increment(key);
-
-        int limit = rateLimit.limit();
-        if(count>limit){
-            response.setStatus(429);
-            response.getWriter().write("Too many requests");
-            return false;
-        }
-
-        if(count==1) {
-            redisTemplate.expire(key, Duration.ofSeconds(rateLimit.durationSeconds()));
-        }
-
-        log.info("Stored in Redis -> {} = {}", key, count);
 
         return true;
     }
