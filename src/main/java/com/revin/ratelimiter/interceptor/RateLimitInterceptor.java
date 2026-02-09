@@ -11,6 +11,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.io.IOException;
 import java.time.Duration;
 
 
@@ -29,7 +30,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             HttpServletRequest request,
             HttpServletResponse response,
             Object handler
-    ){
+    ) throws IOException {
         if(!(handler instanceof HandlerMethod handlerMethod)){
             return true;
         }
@@ -58,11 +59,20 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
 
         String key = "ratelimiter:hit:" + request.getRequestURI();
-        String value = String.valueOf(System.currentTimeMillis());
+        Long count = redisTemplate.opsForValue().increment(key);
 
-        redisTemplate.opsForValue().set(key, value, Duration.ofSeconds(10));
+        int limit = rateLimit.limit();
+        if(count>limit){
+            response.setStatus(429);
+            response.getWriter().write("Too many requests");
+            return false;
+        }
 
-        log.info("Stored in Redis -> {} = {}", key, value);
+        if(count==1) {
+            redisTemplate.expire(key, Duration.ofSeconds(rateLimit.durationSeconds()));
+        }
+
+        log.info("Stored in Redis -> {} = {}", key, count);
 
         return true;
     }
