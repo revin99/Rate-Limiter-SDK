@@ -50,26 +50,26 @@ public class RateLimiterServiceAutoConfiguration {
 
     @Bean
     public TokenBucketRateLimiterService tokenBucketRateLimiterService(
-            @Qualifier("redisTemplate")
-            RedisTemplate<String, String> redisTemplate
+            @Qualifier("redisTemplate") RedisTemplate<String, String> redisTemplate,
+            RateLimitKeyResolver keyResolver
     ) {
-        return new TokenBucketRateLimiterService();
+        return new TokenBucketRateLimiterService(redisTemplate,keyResolver);
     }
 
     @Bean
     public LeakyBucketRateLimiterService leakyBucketRateLimiterService(
-            @Qualifier("redisTemplate")
-            RedisTemplate<String, String> redisTemplate
+            @Qualifier("redisTemplate") RedisTemplate<String, String> redisTemplate,
+            RateLimitKeyResolver keyResolver
     ) {
-        return new LeakyBucketRateLimiterService();
+        return new LeakyBucketRateLimiterService(redisTemplate,keyResolver);
     }
 
     @Bean
     public SlidingWindowRateLimiterService slidingWindowRateLimiterService(
-            @Qualifier("redisTemplate")
-            RedisTemplate<String, String> redisTemplate
+            @Qualifier("redisTemplate") RedisTemplate<String, String> redisTemplate,
+            RateLimitKeyResolver keyResolver
     ) {
-        return new SlidingWindowRateLimiterService();
+        return new SlidingWindowRateLimiterService(redisTemplate,keyResolver);
     }
 
 
