@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.RedisScript;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -51,9 +52,10 @@ public class RateLimiterServiceAutoConfiguration {
     @Bean
     public TokenBucketRateLimiterService tokenBucketRateLimiterService(
             @Qualifier("redisTemplate") RedisTemplate<String, String> redisTemplate,
-            RateLimitKeyResolver keyResolver
+            RateLimitKeyResolver keyResolver,
+            RedisScript<Long> redisScript
     ) {
-        return new TokenBucketRateLimiterService(redisTemplate,keyResolver);
+        return new TokenBucketRateLimiterService(redisTemplate,keyResolver, redisScript);
     }
 
     @Bean
