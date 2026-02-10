@@ -5,5 +5,5 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public interface RateLimiterService {
 
-    boolean isAllowed(RateLimitContext context, HttpServletRequest request);
+    RateLimitResult isAllowed(RateLimitContext context, HttpServletRequest request);
 }

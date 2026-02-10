@@ -28,7 +28,7 @@ end
 
 -- consume token if possible
 if tokens <= 0 then
-    return 0
+    return -1
 end
 
 tokens = tokens - 1
@@ -38,10 +38,9 @@ redis.call("SET", KEYS[1] .. ":tokens", tokens)
 redis.call("SET", KEYS[1] .. ":ts", lastRefill)
 
 
--- cleanup idle buckets
-if tokens == capacity then
-    redis.call("EXPIRE", tokensKey, refillSeconds)
-    redis.call("EXPIRE", tsKey, refillSeconds)
-end
 
-return 1
+redis.call("EXPIRE", KEYS[1] .. ":tokens", refillSeconds *2)
+redis.call("EXPIRE", KEYS[1] .. ":ts", refillSeconds * 2)
+
+-- return remaining tokens
+return tokens

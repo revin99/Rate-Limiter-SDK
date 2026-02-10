@@ -14,7 +14,7 @@ public class RoutingRateLimiterService implements RateLimiterService {
     }
 
     @Override
-    public boolean isAllowed(RateLimitContext context, HttpServletRequest request) {
+    public RateLimitResult isAllowed(RateLimitContext context, HttpServletRequest request) {
 
         Algo algo = context.getRateLimit().algorithm();
         RateLimiterService delegate = rateLimiters.get(algo);
@@ -25,7 +25,7 @@ public class RoutingRateLimiterService implements RateLimiterService {
             );
         }
 
-        return delegate.isAllowed(context,request);
+        return  delegate.isAllowed(context,request);
 
     }
 }

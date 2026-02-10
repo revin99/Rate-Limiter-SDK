@@ -19,10 +19,10 @@ public class LeakyBucketRateLimiterService implements RateLimiterService{
     }
 
     @Override
-    public boolean isAllowed(RateLimitContext context, HttpServletRequest request) {
+    public RateLimitResult isAllowed(RateLimitContext context, HttpServletRequest request) {
 
         String key = keyResolver.resolve(context,request);
 
-        return true;
+        return new RateLimitResult(true,0,0);
     }
 }

@@ -3,6 +3,7 @@ package com.revin.ratelimiter.interceptor;
 
 import com.revin.ratelimiter.annotation.RateLimit;
 import com.revin.ratelimiter.context.RateLimitContext;
+import com.revin.ratelimiter.core.RateLimitResult;
 import com.revin.ratelimiter.core.RateLimiterService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -45,11 +46,26 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
         RateLimitContext context = new RateLimitContext(handlerMethod,rateLimit);
 
-        boolean allowed = rateLimiterService.isAllowed(context,request);
+        RateLimitResult result = rateLimiterService.isAllowed(context,request);
 
-        if(!allowed){
+        response.setHeader(
+                "X-RateLimit-Limit",
+                String.valueOf(context.getRateLimit().limit())
+        );
+        response.setHeader(
+                "X-RateLimit-Remaining",
+                String.valueOf(result.getRemaining())
+        );
+        response.setHeader(
+                "X-RateLimit-Reset",
+                String.valueOf(result.getResetEpochSeconds())
+        );
+
+        if(!result.isAllowed()){
+            long nowEpochSeconds = System.currentTimeMillis()/1000;
+            long retryAfter = Math.max(0,result.getResetEpochSeconds()-nowEpochSeconds);
+            response.setHeader("Retry-After",String.valueOf(retryAfter));
             response.setStatus(429);
-            response.getWriter().write("Too many requests");
             return false;
         }
 

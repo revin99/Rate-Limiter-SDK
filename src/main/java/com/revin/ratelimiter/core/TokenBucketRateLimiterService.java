@@ -29,9 +29,13 @@ public class TokenBucketRateLimiterService implements RateLimiterService{
 
 
     @Override
-    public boolean isAllowed(RateLimitContext context, HttpServletRequest request) {
+    public RateLimitResult isAllowed(RateLimitContext context, HttpServletRequest request) {
 
         String key = keyResolver.resolve(context,request);
+
+        long nowMillis = System.currentTimeMillis();
+        long nowEpochSeconds = nowMillis / 1000;
+
 
         Long result = redisTemplate.execute(
                 tokenBucketLuaScript,
@@ -41,7 +45,21 @@ public class TokenBucketRateLimiterService implements RateLimiterService{
                 String.valueOf(System.currentTimeMillis())
         );
 
-        return result!=null && result==1;
+        boolean allowed = result!=null && result>=0;
+
+        long tokensLeft = allowed?result:0;
+        long capacity = context.getRateLimit().limit();
+        long refillSeconds = context.getRateLimit().durationSeconds();
+
+        long secondsToFull = ((capacity-tokensLeft)*refillSeconds)/capacity;
+        long resetEpochSeconds = nowEpochSeconds + Math.max(0,secondsToFull);
+
+        return new RateLimitResult(
+                allowed,
+                tokensLeft,
+                resetEpochSeconds
+        );
+
 
     }
 }

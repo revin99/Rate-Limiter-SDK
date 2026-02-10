@@ -12,6 +12,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
 
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
 @Configuration
@@ -44,16 +45,17 @@ public class RateLimiterServiceAutoConfiguration {
     @Bean
     public FixedWindowRateLimiterService fixedWindowRateLimiterService(
             @Qualifier("redisTemplate") RedisTemplate<String, String> redisTemplate,
-            RateLimitKeyResolver keyResolver
+            RateLimitKeyResolver keyResolver,
+            @Qualifier("fixedWindowLuaScript") RedisScript<Long> redisScript
     ) {
-        return new FixedWindowRateLimiterService(redisTemplate, keyResolver);
+        return new FixedWindowRateLimiterService(redisTemplate, keyResolver, redisScript);
     }
 
     @Bean
     public TokenBucketRateLimiterService tokenBucketRateLimiterService(
             @Qualifier("redisTemplate") RedisTemplate<String, String> redisTemplate,
             RateLimitKeyResolver keyResolver,
-            RedisScript<Long> redisScript
+            @Qualifier("tokenBucketLuaScript") RedisScript<Long> redisScript
     ) {
         return new TokenBucketRateLimiterService(redisTemplate,keyResolver, redisScript);
     }
@@ -69,9 +71,10 @@ public class RateLimiterServiceAutoConfiguration {
     @Bean
     public SlidingWindowRateLimiterService slidingWindowRateLimiterService(
             @Qualifier("redisTemplate") RedisTemplate<String, String> redisTemplate,
-            RateLimitKeyResolver keyResolver
+            RateLimitKeyResolver keyResolver,
+            @Qualifier("slidingWindowLuaScript") RedisScript<List> redisScript
     ) {
-        return new SlidingWindowRateLimiterService(redisTemplate,keyResolver);
+        return new SlidingWindowRateLimiterService(redisTemplate,keyResolver,redisScript);
     }
 
 
