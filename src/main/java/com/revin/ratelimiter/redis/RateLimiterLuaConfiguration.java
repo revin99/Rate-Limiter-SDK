@@ -35,4 +35,12 @@ public class RateLimiterLuaConfiguration {
         return script;
     }
 
+    @Bean
+    public RedisScript<List> leakyBucketLuaScript(){
+        DefaultRedisScript<List> script = new DefaultRedisScript<>();
+        script.setLocation(new ClassPathResource("lua/leaky_bucket.lua"));
+        script.setResultType(List.class);
+        return script;
+    }
+
 }

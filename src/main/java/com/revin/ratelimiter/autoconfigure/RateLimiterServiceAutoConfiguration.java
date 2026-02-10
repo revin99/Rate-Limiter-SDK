@@ -63,9 +63,10 @@ public class RateLimiterServiceAutoConfiguration {
     @Bean
     public LeakyBucketRateLimiterService leakyBucketRateLimiterService(
             @Qualifier("redisTemplate") RedisTemplate<String, String> redisTemplate,
-            RateLimitKeyResolver keyResolver
+            RateLimitKeyResolver keyResolver,
+            @Qualifier("slidingWindowLuaScript") RedisScript<List> redisScript
     ) {
-        return new LeakyBucketRateLimiterService(redisTemplate,keyResolver);
+        return new LeakyBucketRateLimiterService(redisTemplate,keyResolver,redisScript);
     }
 
     @Bean
